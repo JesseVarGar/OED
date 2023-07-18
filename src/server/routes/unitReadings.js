@@ -11,6 +11,7 @@ const _ = require('lodash');
 const { getConnection } = require('../db');
 const Reading = require('../models/Reading');
 const { TimeInterval } = require('../../common/TimeInterval');
+const { raw } = require('body-parser');
 
 function validateMeterLineReadingsParams(params) {
 	const validParams = {
@@ -47,7 +48,7 @@ function validateLineReadingsQueryParams(queryParams) {
 	return queryValidationResult.valid;
 }
 
-function formatReadingRow(readingRow) {
+function formatReadingRow(readingRow) { //add min and max to this
 	return {
 		reading: readingRow.reading_rate,
 		// This returns a Unix timestamp in milliseconds. This should be smaller in size when sent to the client
@@ -69,6 +70,7 @@ function formatReadingRow(readingRow) {
 async function meterLineReadings(meterIDs, graphicUnitId, timeInterval) {
 	const conn = getConnection();
 	const rawReadings = await Reading.getMeterLineReadings(meterIDs, graphicUnitId, timeInterval.startTimestamp, timeInterval.endTimestamp, conn);
+	console.log('Raw Readings ', rawReadings); //this is testing to see what is in rawReadings. It needs to be changed
 	return _.mapValues(rawReadings, readingsForMeter => readingsForMeter.map(formatReadingRow));
 }
 

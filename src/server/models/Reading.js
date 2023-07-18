@@ -243,13 +243,13 @@ class Reading {
 		 * @type {array<{meter_id: int, reading_rate: Number, start_timestamp: Moment, end_timestamp: Moment}>}
 		 */
 		const allMeterLineReadings = await conn.func('meter_line_readings_unit',
-			[meterIDs, graphicUnitId, fromTimestamp || '-infinity', toTimestamp || 'infinity', 'auto', maxRawPoints, maxHourlyPoints]
+		[meterIDs, graphicUnitId, fromTimestamp || '-infinity', toTimestamp || 'infinity', 'auto', maxRawPoints, maxHourlyPoints]
 		);
-
+		console.log('All Line Readings ', allMeterLineReadings); //testing to see what is in allMeterLineReadings
 		const readingsByMeterID = mapToObject(meterIDs, () => []);
 		for (const row of allMeterLineReadings) {
 			readingsByMeterID[row.meter_id].push(
-				{ reading_rate: row.reading_rate, start_timestamp: row.start_timestamp, end_timestamp: row.end_timestamp }
+				{reading_rate: row.reading_rate, min_rate: row.min_rate, max_rate: row.max_rate, start_timestamp: row.start_timestamp, end_timestamp: row.end_timestamp }
 			);
 		}
 		return readingsByMeterID;
