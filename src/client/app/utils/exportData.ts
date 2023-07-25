@@ -5,6 +5,8 @@
 import { LineReading, BarReading, RawReadings } from '../types/readings';
 import * as moment from 'moment';
 import { ChartTypes } from '../types/redux/graph';
+import { useSelector } from 'react-redux';
+import { LineReadingsState } from '../types/redux/lineReadings';
 
 /**
  * Function to converts the meter readings into a CSV formatted string.
@@ -16,9 +18,11 @@ import { ChartTypes } from '../types/redux/graph';
  */
 function convertToCSV(readings: LineReading[] | BarReading[], meter: string, unitLabel: string, scaling: number) {
 	let csvOutput = 'Readings';
-	//We have to check if readings is LineReading or BarReadings and if error bars are turned on.
+	const isLineReading = readings instanceof Array && readings.length > 0 && 'max' in readings[0];
+	const showMinMax = useSelector((state: LineReadingsState) => state.showMinMax);
+	//We have to check if readings is LineReading or BarReading type and if error bars are turned on.
 	//If these two are true then add columns for min in max.
-	if ('max' in readings) {
+	if (isLineReading && showMinMax) {
 		csvOutput += ', Min, Max';
 	}
 	csvOutput +=`, Start Timestamp, End Timestamp, Meter name, ${meter}, Unit, ${unitLabel}\n`
@@ -32,7 +36,7 @@ function convertToCSV(readings: LineReading[] | BarReading[], meter: string, uni
 		const endTimeStamp = moment.utc(reading.endTimestamp).format('YYYY-MM-DD HH:mm:ss');
 		csvOutput += `${value}`;
 		//Populate the min and max columns only for LineReading types.
-		if ('max' in reading) {
+		if (isLineReading && showMinMax) {
 			const min = reading.min * scaling;
 			const max = reading.max * scaling;
 			csvOutput += `,${min},${max}`
