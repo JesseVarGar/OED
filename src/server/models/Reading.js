@@ -245,7 +245,6 @@ class Reading {
 		const allMeterLineReadings = await conn.func('meter_line_readings_unit',
 		[meterIDs, graphicUnitId, fromTimestamp || '-infinity', toTimestamp || 'infinity', 'auto', maxRawPoints, maxHourlyPoints]
 		);
-		console.log('All Line Readings ', allMeterLineReadings); //testing to see what is in allMeterLineReadings
 		const readingsByMeterID = mapToObject(meterIDs, () => []);
 		for (const row of allMeterLineReadings) {
 			readingsByMeterID[row.meter_id].push(

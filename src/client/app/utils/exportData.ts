@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { LineReading, RawReadings } from '../types/readings';
+import { LineReading, BarReading, RawReadings } from '../types/readings';
 import * as moment from 'moment';
 import { ChartTypes } from '../types/redux/graph';
 
@@ -14,8 +14,14 @@ import { ChartTypes } from '../types/redux/graph';
  * @param scaling factor to scale readings by, normally the rate factor for line or 1
  * @returns A string containing the CSV formatted meter readings.
  */
-function convertToCSV(readings: LineReading[], meter: string, unitLabel: string, scaling: number) {
-	let csvOutput = `Readings,Start Timestamp, End Timestamp, Meter name, ${meter}, Unit, ${unitLabel}\n`;
+function convertToCSV(readings: LineReading[] | BarReading[], meter: string, unitLabel: string, scaling: number) {
+	let csvOutput = 'Readings';
+	//We have to check if readings is LineReading or BarReadings and if error bars are turned on.
+	//If these two are true then add columns for min in max.
+	if ('max' in readings) {
+		csvOutput += ', Min, Max';
+	}
+	csvOutput +=`, Start Timestamp, End Timestamp, Meter name, ${meter}, Unit, ${unitLabel}\n`
 	readings.forEach(reading => {
 		const value = reading.reading * scaling;
 		// As usual, maintain UTC.
@@ -24,7 +30,14 @@ function convertToCSV(readings: LineReading[], meter: string, unitLabel: string,
 		// somewhat universal way of formatting.
 		const startTimeStamp = moment.utc(reading.startTimestamp).format('YYYY-MM-DD HH:mm:ss');
 		const endTimeStamp = moment.utc(reading.endTimestamp).format('YYYY-MM-DD HH:mm:ss');
-		csvOutput += `${value},${startTimeStamp},${endTimeStamp}\n`;
+		csvOutput += `${value}`;
+		//Populate the min and max columns only for LineReading types.
+		if ('max' in reading) {
+			const min = reading.min * scaling;
+			const max = reading.max * scaling;
+			csvOutput += `,${min},${max}`
+		}
+		csvOutput += `,${startTimeStamp},${endTimeStamp}\n`;
 	});
 	return csvOutput;
 }
@@ -56,7 +69,7 @@ function downloadCSV(inputCSV: string, fileName: string) {
  * @param chartName the name of the chart/graphic being exported
  * @param scaling factor to scale readings by, normally the rate factor for line or 1
  */
-export default function graphExport(readings: LineReading[], meter: string, unitLabel: string, unitIdentifier: string,
+export default function graphExport(readings: LineReading[] | BarReading[], meter: string, unitLabel: string, unitIdentifier: string,
 	chartName: ChartTypes, scaling: number) {
 	// It is possible that some meters have not readings so skip if do. This can happen if resize the range of dates (or no data).
 	if (readings.length !== 0) {

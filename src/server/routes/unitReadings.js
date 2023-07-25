@@ -48,13 +48,15 @@ function validateLineReadingsQueryParams(queryParams) {
 	return queryValidationResult.valid;
 }
 
-function formatReadingRow(readingRow) { //add min and max to this
+function formatReadingRow(readingRow) {
 	return {
 		reading: readingRow.reading_rate,
 		// This returns a Unix timestamp in milliseconds. This should be smaller in size when sent to the client
 		// compared to sending the formatted moment object. All values are sent as a string.
 		// The consequence of doing this is that when the client recreates this as a moment it will do it in
 		// the local timezone of the client. That is why the client code generally uses moment.utc().
+		min: readingRow.min_rate,
+		max: readingRow.max_rate,
 		startTimestamp: readingRow.start_timestamp.valueOf(),
 		endTimestamp: readingRow.end_timestamp.valueOf()
 	};
@@ -70,7 +72,7 @@ function formatReadingRow(readingRow) { //add min and max to this
 async function meterLineReadings(meterIDs, graphicUnitId, timeInterval) {
 	const conn = getConnection();
 	const rawReadings = await Reading.getMeterLineReadings(meterIDs, graphicUnitId, timeInterval.startTimestamp, timeInterval.endTimestamp, conn);
-	console.log('Raw Readings ', rawReadings); //this is testing to see what is in rawReadings. It needs to be changed
+	// console.log('Raw Readings ', rawReadings); //this is testing to see what is in rawReadings. It needs to be changed 
 	return _.mapValues(rawReadings, readingsForMeter => readingsForMeter.map(formatReadingRow));
 }
 

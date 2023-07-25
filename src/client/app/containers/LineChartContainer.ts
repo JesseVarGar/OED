@@ -66,6 +66,8 @@ function mapStateToProps(state: State) {
 					// Create two arrays for the x and y values. Fill the array with the data from the line readings
 					const xData: string[] = [];
 					const yData: number[] = [];
+					const yMinData: number[] = [];
+					const yMaxData: number[] = [];
 					const hoverText: string[] = [];
 					const readings = _.values(readingsData.readings);
 					// Check if reading needs scaling outside of the loop so only one check is needed
@@ -80,7 +82,10 @@ function mapStateToProps(state: State) {
 							const timeReading = st.add(moment.utc(reading.endTimestamp).diff(st) / 2);
 							xData.push(timeReading.format('YYYY-MM-DD HH:mm:ss'));
 							yData.push(reading.reading * rate);
+							yMinData.push((reading.reading - reading.min) * rate);
+							yMaxData.push((reading.max - reading.reading) * rate);
 							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${(reading.reading * rate).toPrecision(6)} ${unitLabel}`);
+							//add min and max to hoverText
 						});
 					}
 					else {
@@ -92,10 +97,17 @@ function mapStateToProps(state: State) {
 							const timeReading = st.add(moment.utc(reading.endTimestamp).diff(st) / 2);
 							xData.push(timeReading.format('YYYY-MM-DD HH:mm:ss'));
 							let readingValue = reading.reading;
+							let minValue = readingValue - reading.min;
+							let maxValue = reading.max - readingValue;
 							if (state.graph.areaNormalization) {
 								readingValue /= meterArea;
+								minValue /= meterArea;
+								maxValue /= meterArea;
 							}
 							yData.push(readingValue);
+							yMinData.push(minValue);
+							yMaxData.push(maxValue);
+							// <br> Min: ${reading.min.toPrecision(6)} ${unitLabel} <br> Max: ${reading.max.toPrecision(6)} ${unitLabel}
 							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel}`);
 						});
 					}
@@ -119,6 +131,12 @@ function mapStateToProps(state: State) {
 						name: label,
 						x: xData,
 						y: yData,
+						error_y: {
+							type: 'data',
+							symmetric: false,
+							array: yMaxData,
+							arrayminus: yMinData
+						},
 						text: hoverText,
 						hoverinfo: 'text',
 						type: 'scatter',

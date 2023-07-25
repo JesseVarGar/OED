@@ -131,6 +131,7 @@ export interface LineGraphRate {
 
 export interface GraphState {
 	areaNormalization: boolean;
+	//add an error bar boolean here
 	selectedMeters: number[];
 	selectedGroups: number[];
 	selectedUnit: number;
