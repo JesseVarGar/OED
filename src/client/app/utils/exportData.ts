@@ -18,7 +18,7 @@ import { ChartTypes } from '../types/redux/graph';
  */
 function convertToCSV(readings: LineReading[] | BarReading[], meter: string, unitLabel: string, chartName: ChartTypes,
 	scaling: number, errorBarState: boolean = false) {
-	let csvOutput = 'Readings';
+	let csvOutput = 'Readings, Start Timestamp, End Timestamp';
 	// Check if readings is of LineReading type and if error bars are turned on.
 	// If these two are true then add columns for min and max.
 	const showMinMax = chartName === ChartTypes.line && errorBarState;
@@ -27,7 +27,7 @@ function convertToCSV(readings: LineReading[] | BarReading[], meter: string, uni
 	} else {
 		csvOutput += ',,';
 	}
-	csvOutput +=`, Start Timestamp, End Timestamp, Meter name, ${meter}, Unit, ${unitLabel}\n`
+	csvOutput +=`, Meter name, ${meter}, Unit, ${unitLabel}\n`
 	readings.forEach(reading => {
 		const value = reading.reading * scaling;
 		// As usual, maintain UTC.
