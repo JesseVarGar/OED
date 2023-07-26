@@ -78,14 +78,18 @@ function mapStateToProps(state: State) {
 							// As usual, we want to interpret the readings in UTC. We lose the timezone as this as the start/endTimestamp
 							// are equivalent to Unix timestamp in milliseconds.
 							const st = moment.utc(reading.startTimestamp);
+							//Add min and max to hover text if error bars are on
+							let minMaxText = '';
+							if (state.graph.showMinMax) {
+								minMaxText = `<br> Min: ${(reading.min * rate).toPrecision(6)} ${unitLabel}<br> Max: ${(reading.max * rate).toPrecision(6)} ${unitLabel}`
+							}
 							// Time reading is in the middle of the start and end timestamp
 							const timeReading = st.add(moment.utc(reading.endTimestamp).diff(st) / 2);
 							xData.push(timeReading.format('YYYY-MM-DD HH:mm:ss'));
 							yData.push(reading.reading * rate);
 							yMinData.push((reading.reading - reading.min) * rate);
 							yMaxData.push((reading.max - reading.reading) * rate);
-							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${(reading.reading * rate).toPrecision(6)} ${unitLabel}`);
-							//add min and max to hoverText
+							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${(reading.reading * rate).toPrecision(6)} ${unitLabel} ${minMaxText}`);
 						});
 					}
 					else {
@@ -93,6 +97,8 @@ function mapStateToProps(state: State) {
 							// As usual, we want to interpret the readings in UTC. We lose the timezone as this as the start/endTimestamp
 							// are equivalent to Unix timestamp in milliseconds.
 							const st = moment.utc(reading.startTimestamp);
+							//Add min and max to hover text if error bars are on
+							let minMaxText = '';
 							// Time reading is in the middle of the start and end timestamp
 							const timeReading = st.add(moment.utc(reading.endTimestamp).diff(st) / 2);
 							xData.push(timeReading.format('YYYY-MM-DD HH:mm:ss'));
@@ -104,11 +110,13 @@ function mapStateToProps(state: State) {
 								minValue /= meterArea;
 								maxValue /= meterArea;
 							}
+							if (state.graph.showMinMax) {
+								minMaxText = `<br> Min: ${reading.min.toPrecision(6)} ${unitLabel}<br> Max: ${reading.max.toPrecision(6)} ${unitLabel}`
+							}
 							yData.push(readingValue);
 							yMinData.push(minValue);
 							yMaxData.push(maxValue);
-							// <br> Min: ${reading.min.toPrecision(6)} ${unitLabel} <br> Max: ${reading.max.toPrecision(6)} ${unitLabel}
-							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel}`);
+							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel} ${minMaxText}`);
 						});
 					}
 
@@ -131,12 +139,12 @@ function mapStateToProps(state: State) {
 						name: label,
 						x: xData,
 						y: yData,
-						error_y: {
+						error_y: state.graph.showMinMax ? {
 							type: 'data',
 							symmetric: false,
 							array: yMaxData,
 							arrayminus: yMinData
-						},
+						} : undefined,
 						text: hoverText,
 						hoverinfo: 'text',
 						type: 'scatter',
