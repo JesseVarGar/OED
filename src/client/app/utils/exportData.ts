@@ -11,18 +11,21 @@ import { ChartTypes } from '../types/redux/graph';
  * @param readings The meter readings.
  * @param meter the meter identifier for data being exported
  * @param unitLabel the full y-axis label on the graphic
+ * @param chartName the name of the chart/graphic being exported
  * @param scaling factor to scale readings by, normally the rate factor for line or 1
- * @param errorBarState a boolean that will indicate if the error bars are on.
+ * @param errorBarState This indicate if the error bars are on. Automatically false if no argument is given.
  * @returns A string containing the CSV formatted meter readings.
  */
-function convertToCSV(readings: LineReading[] | BarReading[], meter: string, unitLabel: string, scaling: number,
-	errorBarState: boolean | undefined) {
+function convertToCSV(readings: LineReading[] | BarReading[], meter: string, unitLabel: string, chartName: ChartTypes,
+	scaling: number, errorBarState: boolean = false) {
 	let csvOutput = 'Readings';
-	//Check if readings is of LineReading or BarReading type and if error bars are turned on.
-	//If these two are true then add columns for min in max.
-	const isLineReading = readings instanceof Array && readings.length > 0 && 'max' in readings[0];
-	if (isLineReading && errorBarState) {
+	// Check if readings is of LineReading type and if error bars are turned on.
+	// If these two are true then add columns for min and max.
+	const showMinMax = chartName === ChartTypes.line && errorBarState;
+	if (showMinMax) {
 		csvOutput += ', Min, Max';
+	} else {
+		csvOutput += ',,';
 	}
 	csvOutput +=`, Start Timestamp, End Timestamp, Meter name, ${meter}, Unit, ${unitLabel}\n`
 	readings.forEach(reading => {
@@ -33,14 +36,14 @@ function convertToCSV(readings: LineReading[] | BarReading[], meter: string, uni
 		// somewhat universal way of formatting.
 		const startTimeStamp = moment.utc(reading.startTimestamp).format('YYYY-MM-DD HH:mm:ss');
 		const endTimeStamp = moment.utc(reading.endTimestamp).format('YYYY-MM-DD HH:mm:ss');
-		csvOutput += `${value}`;
-		//Populate the min and max columns only for LineReading types.
-		if (isLineReading && errorBarState) {
+		csvOutput += `${value},${startTimeStamp},${endTimeStamp}`;
+		// Populate the min and max columns only for LineReading types.
+		if (showMinMax) {
 			const min = reading.min * scaling;
 			const max = reading.max * scaling;
 			csvOutput += `,${min},${max}`
 		}
-		csvOutput += `,${startTimeStamp},${endTimeStamp}\n`;
+		csvOutput += '\n';
 	});
 	return csvOutput;
 }
@@ -71,13 +74,13 @@ function downloadCSV(inputCSV: string, fileName: string) {
  * @param unitIdentifier the unit identifier for data being exported
  * @param chartName the name of the chart/graphic being exported
  * @param scaling factor to scale readings by, normally the rate factor for line or 1
- * @param errorBarState a boolean that will indicate if the error bars are on.
+ * @param errorBarState This indicate if the error bars are on. Automatically false if no argument is given.
  */
 export default function graphExport(readings: LineReading[] | BarReading[], meter: string, unitLabel: string, unitIdentifier: string,
-	chartName: ChartTypes, scaling: number, errorBarState?: boolean | undefined) {
+	chartName: ChartTypes, scaling: number, errorBarState: boolean = false) {
 	// It is possible that some meters have not readings so skip if do. This can happen if resize the range of dates (or no data).
 	if (readings.length !== 0) {
-		const dataToExport = convertToCSV(readings, meter, unitLabel, scaling, errorBarState);
+		const dataToExport = convertToCSV(readings, meter, unitLabel, chartName, scaling, errorBarState);
 
 		// Determine and format the first time in the dataset which is first one in array since just sorted and the start time.
 		// As usual, maintain UTC.

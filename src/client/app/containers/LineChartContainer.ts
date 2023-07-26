@@ -105,13 +105,17 @@ function mapStateToProps(state: State) {
 							let readingValue = reading.reading;
 							let minValue = readingValue - reading.min;
 							let maxValue = reading.max - readingValue;
+							let minHoverText = reading.min;
+							let maxHoverText = reading.max;
 							if (state.graph.areaNormalization) {
 								readingValue /= meterArea;
 								minValue /= meterArea;
 								maxValue /= meterArea;
+								minHoverText /= meterArea;
+								maxHoverText /= meterArea;
 							}
 							if (state.graph.showMinMax) {
-								minMaxText = `<br> Min: ${reading.min.toPrecision(6)} ${unitLabel}<br> Max: ${reading.max.toPrecision(6)} ${unitLabel}`
+								minMaxText = `<br> Min: ${minHoverText.toPrecision(6)} ${unitLabel}<br> Max: ${maxHoverText.toPrecision(6)} ${unitLabel}`
 							}
 							yData.push(readingValue);
 							yMinData.push(minValue);
