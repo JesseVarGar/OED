@@ -245,10 +245,11 @@ class Reading {
 		const allMeterLineReadings = await conn.func('meter_line_readings_unit',
 		[meterIDs, graphicUnitId, fromTimestamp || '-infinity', toTimestamp || 'infinity', 'auto', maxRawPoints, maxHourlyPoints]
 		);
+		
 		const readingsByMeterID = mapToObject(meterIDs, () => []);
 		for (const row of allMeterLineReadings) {
 			readingsByMeterID[row.meter_id].push(
-				{reading_rate: row.reading_rate, min_rate: row.min_rate, max_rate: row.max_rate, start_timestamp: row.start_timestamp, end_timestamp: row.end_timestamp }
+				{ reading_rate: row.reading_rate, min_rate: row.min_rate, max_rate: row.max_rate, start_timestamp: row.start_timestamp, end_timestamp: row.end_timestamp }
 			);
 		}
 		return readingsByMeterID;

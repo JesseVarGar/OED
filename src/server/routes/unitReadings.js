@@ -72,7 +72,6 @@ function formatReadingRow(readingRow) {
 async function meterLineReadings(meterIDs, graphicUnitId, timeInterval) {
 	const conn = getConnection();
 	const rawReadings = await Reading.getMeterLineReadings(meterIDs, graphicUnitId, timeInterval.startTimestamp, timeInterval.endTimestamp, conn);
-	// console.log('Raw Readings ', rawReadings); //this is testing to see what is in rawReadings. It needs to be changed 
 	return _.mapValues(rawReadings, readingsForMeter => readingsForMeter.map(formatReadingRow));
 }
 
