@@ -31,6 +31,10 @@ export function toggleAreaNormalization(): t.ToggleAreaNormalizationAction {
 	return { type: ActionType.ToggleAreaNormalization };
 }
 
+export function toggleShowMinMax(): t.ToggleShowMinMaxAction {
+	return { type: ActionType.ToggleShowMinMax }
+}
+
 export function changeBarStacking(): t.ChangeBarStackingAction {
 	return { type: ActionType.ChangeBarStacking };
 }

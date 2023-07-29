@@ -57,6 +57,10 @@ export interface ToggleAreaNormalizationAction {
 	type: ActionType.ToggleAreaNormalization;
 }
 
+export interface ToggleShowMinMaxAction {
+	type: ActionType.ToggleShowMinMax;
+}
+
 export interface ChangeBarStackingAction {
 	type: ActionType.ChangeBarStacking;
 }
@@ -111,6 +115,7 @@ export type GraphAction =
 	| ResetRangeSliderStackAction
 	| ChangeBarStackingAction
 	| ToggleAreaNormalizationAction
+	| ToggleShowMinMaxAction
 	| ChangeChartToRenderAction
 	| UpdateBarDurationAction
 	| UpdateSelectedGroupsAction
@@ -135,6 +140,7 @@ export interface GraphState {
 	selectedGroups: number[];
 	selectedUnit: number;
 	selectedAreaUnit: AreaUnitType;
+	showMinMax: boolean;
 	timeInterval: TimeInterval;
 	rangeSliderInterval: TimeInterval;
 	barDuration: moment.Duration;

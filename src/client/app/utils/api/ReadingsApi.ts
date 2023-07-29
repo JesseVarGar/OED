@@ -34,7 +34,6 @@ export default class ReadingsApi {
 		_.values(readings)
 			.forEach( (value: LineReading[]) => value.sort((a, b) => a.startTimestamp - b.startTimestamp));
 		return readings;
-		//console.log readings here to see if min and max is in here (going to client side)
 	}
 
 	/**

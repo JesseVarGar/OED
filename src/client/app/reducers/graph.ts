@@ -14,6 +14,7 @@ const defaultState: GraphState = {
 	selectedGroups: [],
 	selectedUnit: -99,
 	selectedAreaUnit: AreaUnitType.none,
+	showMinMax: false,
 	timeInterval: TimeInterval.unbounded(),
 	rangeSliderInterval: TimeInterval.unbounded(),
 	barDuration: moment.duration(4, 'weeks'),
@@ -92,6 +93,11 @@ export default function graph(state = defaultState, action: GraphAction) {
 			return {
 				...state,
 				areaNormalization: !state.areaNormalization
+			};
+		case ActionType.ToggleShowMinMax:
+			return {
+				...state,
+				showMinMax: !state.showMinMax
 			};
 		case ActionType.ChangeBarStacking:
 			return {

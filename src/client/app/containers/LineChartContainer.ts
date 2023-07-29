@@ -66,6 +66,8 @@ function mapStateToProps(state: State) {
 					// Create two arrays for the x and y values. Fill the array with the data from the line readings
 					const xData: string[] = [];
 					const yData: number[] = [];
+					const yMinData: number[] = [];
+					const yMaxData: number[] = [];
 					const hoverText: string[] = [];
 					const readings = _.values(readingsData.readings);
 					// Check if reading needs scaling outside of the loop so only one check is needed
@@ -76,11 +78,18 @@ function mapStateToProps(state: State) {
 							// As usual, we want to interpret the readings in UTC. We lose the timezone as this as the start/endTimestamp
 							// are equivalent to Unix timestamp in milliseconds.
 							const st = moment.utc(reading.startTimestamp);
+							//Add min and max to hover text if error bars are on
+							let minMaxText = '';
+							if (state.graph.showMinMax) {
+								minMaxText = `<br> Min: ${(reading.min * rate).toPrecision(6)} ${unitLabel}<br> Max: ${(reading.max * rate).toPrecision(6)} ${unitLabel}`
+							}
 							// Time reading is in the middle of the start and end timestamp
 							const timeReading = st.add(moment.utc(reading.endTimestamp).diff(st) / 2);
 							xData.push(timeReading.format('YYYY-MM-DD HH:mm:ss'));
 							yData.push(reading.reading * rate);
-							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${(reading.reading * rate).toPrecision(6)} ${unitLabel}`);
+							yMinData.push((reading.reading - reading.min) * rate);
+							yMaxData.push((reading.max - reading.reading) * rate);
+							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${(reading.reading * rate).toPrecision(6)} ${unitLabel} ${minMaxText}`);
 						});
 					}
 					else {
@@ -88,15 +97,30 @@ function mapStateToProps(state: State) {
 							// As usual, we want to interpret the readings in UTC. We lose the timezone as this as the start/endTimestamp
 							// are equivalent to Unix timestamp in milliseconds.
 							const st = moment.utc(reading.startTimestamp);
+							//Add min and max to hover text if error bars are on
+							let minMaxText = '';
 							// Time reading is in the middle of the start and end timestamp
 							const timeReading = st.add(moment.utc(reading.endTimestamp).diff(st) / 2);
 							xData.push(timeReading.format('YYYY-MM-DD HH:mm:ss'));
 							let readingValue = reading.reading;
+							let minValue = readingValue - reading.min;
+							let maxValue = reading.max - readingValue;
+							let minHoverText = reading.min;
+							let maxHoverText = reading.max;
 							if (state.graph.areaNormalization) {
 								readingValue /= meterArea;
+								minValue /= meterArea;
+								maxValue /= meterArea;
+								minHoverText /= meterArea;
+								maxHoverText /= meterArea;
+							}
+							if (state.graph.showMinMax) {
+								minMaxText = `<br> Min: ${minHoverText.toPrecision(6)} ${unitLabel}<br> Max: ${maxHoverText.toPrecision(6)} ${unitLabel}`
 							}
 							yData.push(readingValue);
-							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel}`);
+							yMinData.push(minValue);
+							yMaxData.push(maxValue);
+							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel} ${minMaxText}`);
 						});
 					}
 
@@ -119,6 +143,12 @@ function mapStateToProps(state: State) {
 						name: label,
 						x: xData,
 						y: yData,
+						error_y: state.graph.showMinMax ? {
+							type: 'data',
+							symmetric: false,
+							array: yMaxData,
+							arrayminus: yMinData
+						} : undefined,
 						text: hoverText,
 						hoverinfo: 'text',
 						type: 'scatter',
