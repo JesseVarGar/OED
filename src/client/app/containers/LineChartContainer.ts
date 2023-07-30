@@ -84,16 +84,16 @@ function mapStateToProps(state: State) {
 						const readingValue = reading.reading * scaling;
 						const minValue = (reading.reading - reading.min) * scaling;
 						const maxValue = (reading.max - reading.reading) * scaling;
-            const minMaxText = `<br> Min: ${minHoverText.toPrecision(6)} ${unitLabel} <br> Max: ${maxHoverText.toPrecision(6)} ${unitLabel}`
-            yData.push(readingValue);
-            yMinData.push(minValue);
+						const minMaxText = `<br> Min: ${(reading.min * scaling).toPrecision(6)} ${unitLabel} <br> Max: ${(reading.max * scaling).toPrecision(6)} ${unitLabel}`
+						yData.push(readingValue);
+						yMinData.push(minValue);
 						yMaxData.push(maxValue);
-            if (state.graph.showMinMax) {
-              hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel} ${minMaxText}`);
-            } else {
-						  hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel}`);
-            }
-          });
+						if (state.graph.showMinMax) {
+							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel} ${minMaxText}`);
+						} else {
+							hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel}`);
+						}
+					});
 
 					/*
 					get the min and max timestamp of the meter, and compare it to the global values
