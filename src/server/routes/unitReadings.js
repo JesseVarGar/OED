@@ -11,6 +11,7 @@ const _ = require('lodash');
 const { getConnection } = require('../db');
 const Reading = require('../models/Reading');
 const { TimeInterval } = require('../../common/TimeInterval');
+const { raw } = require('body-parser');
 
 function validateMeterLineReadingsParams(params) {
 	const validParams = {
@@ -54,6 +55,8 @@ function formatReadingRow(readingRow) {
 		// compared to sending the formatted moment object. All values are sent as a string.
 		// The consequence of doing this is that when the client recreates this as a moment it will do it in
 		// the local timezone of the client. That is why the client code generally uses moment.utc().
+		min: readingRow.min_rate,
+		max: readingRow.max_rate,
 		startTimestamp: readingRow.start_timestamp.valueOf(),
 		endTimestamp: readingRow.end_timestamp.valueOf()
 	};

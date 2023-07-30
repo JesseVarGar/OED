@@ -23,6 +23,8 @@ export interface RawReadings {
 
 export interface LineReading {
 	reading: number;
+	min: number;
+	max: number;
 	startTimestamp: number;
 	endTimestamp: number;
 }

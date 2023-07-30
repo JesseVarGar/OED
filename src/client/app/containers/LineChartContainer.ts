@@ -68,6 +68,8 @@ function mapStateToProps(state: State) {
 					// Create two arrays for the x and y values. Fill the array with the data from the line readings
 					const xData: string[] = [];
 					const yData: number[] = [];
+					const yMinData: number[] = [];
+					const yMaxData: number[] = [];
 					const hoverText: string[] = [];
 					const readings = _.values(readingsData.readings);
 					// The scaling is the factor to change the reading by. It divides by the area while will be 1 if no scaling by area.
@@ -80,9 +82,18 @@ function mapStateToProps(state: State) {
 						const timeReading = st.add(moment.utc(reading.endTimestamp).diff(st) / 2);
 						xData.push(timeReading.format('YYYY-MM-DD HH:mm:ss'));
 						const readingValue = reading.reading * scaling;
-						yData.push(readingValue);
-						hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel}`);
-					});
+						const minValue = (reading.reading - reading.min) * scaling;
+						const maxValue = (reading.max - reading.reading) * scaling;
+            const minMaxText = `<br> Min: ${minHoverText.toPrecision(6)} ${unitLabel} <br> Max: ${maxHoverText.toPrecision(6)} ${unitLabel}`
+            yData.push(readingValue);
+            yMinData.push(minValue);
+						yMaxData.push(maxValue);
+            if (state.graph.showMinMax) {
+              hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel} ${minMaxText}`);
+            } else {
+						  hoverText.push(`<b> ${timeReading.format('ddd, ll LTS')} </b> <br> ${label}: ${readingValue.toPrecision(6)} ${unitLabel}`);
+            }
+          });
 
 					/*
 					get the min and max timestamp of the meter, and compare it to the global values
@@ -103,6 +114,12 @@ function mapStateToProps(state: State) {
 						name: label,
 						x: xData,
 						y: yData,
+						error_y: state.graph.showMinMax ? {
+							type: 'data',
+							symmetric: false,
+							array: yMaxData,
+							arrayminus: yMinData
+						} : undefined,
 						text: hoverText,
 						hoverinfo: 'text',
 						type: 'scatter',

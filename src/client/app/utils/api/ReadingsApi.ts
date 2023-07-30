@@ -29,6 +29,7 @@ export default class ReadingsApi {
 			`/api/unitReadings/line/meters/${stringifiedIDs}`,
 			{ timeInterval: timeInterval.toString(), graphicUnitId: unitID.toString() }
 		);
+		// TODO db should be sorting data, why are we sorting here?
 		// Ensure everything is sorted
 		_.values(readings)
 			.forEach( (value: LineReading[]) => value.sort((a, b) => a.startTimestamp - b.startTimestamp));
