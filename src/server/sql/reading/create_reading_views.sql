@@ -456,6 +456,7 @@ DECLARE
 					-- to per hour.
 					((r.reading * 3600 / u.sec_in_rate) * c.slope + c.intercept)
 				END AS reading_rate,
+				--The next two case expressions are copied from the case expression above. "reading_rate AS min/max_rate" does not work.
 				CASE WHEN u.unit_represent = 'quantity'::unit_represent_type THEN
 					-- If it is quantity readings then need to convert to rate per hour by dividing by the time length where
 					-- the 3600 is needed since EPOCH is in seconds.
